@@ -1,7 +1,8 @@
 --[[
 	walking on ice makes player walk faster,
 	stepping through snow slows player down,
-	touching a cactus hurts player.
+	touching a cactus hurts player,
+	player stuf inside node suffocates.
 
 	PlayerPlus by TenPlus1
 ]]
@@ -53,6 +54,20 @@ minetest.register_globalstep(function(dtime)
 			-- set player physics
 			player:set_physics_override(pp.speed, pp.jump, pp.gravity)
 			-- print ("Speed:", pp.speed, "Jump:", pp.jump, "Gravity:", pp.gravity)
+
+			-- get node at head level
+			pos.y = pos.y + 1
+			nod = minetest.get_node(pos).name
+			pos.y = pos.y - 1
+
+			-- is player suffocating inside node?
+			if minetest.registered_nodes[nod]
+			and minetest.registered_nodes[nod].walkable
+			and not minetest.check_player_privs(player:get_player_name(), {noclip=true}) then
+				if player:get_hp() > 0 then
+					player:set_hp(player:get_hp()-1)
+				end
+			end
 
 			-- am I near a cactus?
 			local near = minetest.find_node_near(pos, 1, "default:cactus")
