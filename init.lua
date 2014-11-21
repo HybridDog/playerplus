@@ -2,7 +2,7 @@
 	walking on ice makes player walk faster,
 	stepping through snow slows player down,
 	touching a cactus hurts player,
-	player stuf inside node suffocates.
+	player stuck inside node suffocates.
 
 	PlayerPlus by TenPlus1
 ]]
@@ -60,9 +60,10 @@ minetest.register_globalstep(function(dtime)
 			nod = minetest.get_node(pos).name
 			pos.y = pos.y - 1
 
-			-- is player suffocating inside node?
+			-- is player suffocating inside node? (that isn't a door)
 			if minetest.registered_nodes[nod]
 			and minetest.registered_nodes[nod].walkable
+			and not nod:find("door")
 			and not minetest.check_player_privs(player:get_player_name(), {noclip=true}) then
 				if player:get_hp() > 0 then
 					player:set_hp(player:get_hp()-1)
