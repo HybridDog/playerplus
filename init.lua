@@ -60,10 +60,10 @@ minetest.register_globalstep(function(dtime)
 			nod = minetest.get_node(pos).name
 			pos.y = pos.y - 1
 
-			-- is player suffocating inside node? (that isn't a door)
+			-- is player suffocating inside node? (nodes found in default game only)
 			if minetest.registered_nodes[nod]
 			and minetest.registered_nodes[nod].walkable
-			and not nod:find("door")
+			and nod:find("default:")
 			and not minetest.check_player_privs(player:get_player_name(), {noclip=true}) then
 				if player:get_hp() > 0 then
 					player:set_hp(player:get_hp()-1)
