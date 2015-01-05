@@ -7,6 +7,11 @@
 	PlayerPlus by TenPlus1
 ]]
 
+-- Override lava_and fire so they do not hurt player
+minetest.override_item("default:lava_source", {damage_per_second = 0})
+minetest.override_item("default:lava_flowing", {damage_per_second = 0})
+minetest.override_item("fire:basic_flame", {damage_per_second = 0})
+
 pp = {}
 
 local time = 0
@@ -41,6 +46,7 @@ minetest.register_globalstep(function(dtime)
 			pp.speed = def.speed or 1
 			pp.jump = def.jump or 1
 			pp.gravity = def.gravity or 1
+			pp.lava = def.lava or 0
 
 			-- standing on ice? if so walk faster
 			if nod == "default:ice" then
@@ -55,13 +61,47 @@ minetest.register_globalstep(function(dtime)
 				
 			-- set player physics
 			player:set_physics_override(pp.speed, pp.jump, pp.gravity)
-			--print ("Speed:", pp.speed, "Jump:", pp.jump, "Gravity:", pp.gravity)
+			--print ("Speed:", pp.speed, "Jump:", pp.jump, "Gravity:", pp.gravity, "Lava:"..pp.lava)
 
 			-- get node at head level
 			pos.y = pos.y + 1
 			nod = minetest.get_node(pos).name
 			pos.y = pos.y - 1
 			local nob = minetest.get_node(pos).name
+
+			-- is player in lava, if so is fire protection 4 or higher
+			if pp.lava < 4 then
+				if nod == "default:lava_source"
+				or nod == "default:lava_flowing"
+				or nob == "default:lava_source"
+				or nob == "default:lava_flowing" then
+					if player:get_hp() > 0 then
+						player:set_hp(player:get_hp()-4)
+					end
+				end
+			end
+
+			-- is player in fire, if so is fire protection 3 or higher
+			if pp.lava < 3 then
+				if nob == "fire:basic_flame"
+				or nod == "fire:basic_flame" then
+					if player:get_hp() > 0 then
+						player:set_hp(player:get_hp()-4)
+					end
+				end
+			end
+
+			-- is player touching torch or safe fire, if so is fire protection 1 or higher
+			if pp.lava == 0 then
+				if nod == "default:torch"
+				or nob == "default:torch"
+				or nob == "bakedclay:safe_fire"
+				or nob == "bakedclay:safe_fire" then
+					if player:get_hp() > 0 then
+						player:set_hp(player:get_hp()-1)
+					end
+				end
+			end
 
 			-- is player suffocating inside node? (nodes found in default game only)
 			if minetest.registered_nodes[nod]
