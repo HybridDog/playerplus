@@ -86,11 +86,10 @@ minetest.register_globalstep(function(dtime)
 		player:set_physics_override(pp.speed, pp.jump, pp.gravity)
 		--print ("Speed:", pp.speed, "Jump:", pp.jump, "Gravity:", pp.gravity)
 
-		-- is player suffocating inside node? (only nodes found in default game)
-		if nod_head ~= "default:sign_wall"
-		and nod_head:find("default:")
-		and minetest.registered_nodes[nod_head].walkable then
-		--and not minetest.check_player_privs(player:get_player_name(), {noclip = true}) then
+		-- is player suffocating inside node? (only solid "normal" type nodes)
+		if minetest.registered_nodes[nod_head].walkable
+		and minetest.registered_nodes[nod_head].drawtype == "normal"
+		and not minetest.check_player_privs(player:get_player_name(), {noclip = true}) then
 
 			if player:get_hp() > 0 then
 				player:set_hp(player:get_hp() - 2)
