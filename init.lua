@@ -25,7 +25,7 @@ local function node_ok(pos, fallback)
 	return fallback
 end
 
-local pp = {}
+local armor_mod = minetest.get_modpath("3d_armor")
 local def = {}
 local time = 0
 
@@ -44,6 +44,9 @@ minetest.register_globalstep(function(dtime)
 	-- check players
 	for _,player in pairs(minetest.get_connected_players()) do
 
+		-- who am I?
+		local name = player:get_player_name()
+
 		-- where am I?
 		local pos = player:getpos()
 
@@ -59,19 +62,22 @@ minetest.register_globalstep(function(dtime)
 
 		pos.y = pos.y - 0.2 -- reset pos
 
-		-- is 3d_armor mod active? if so make armor physics default
-		if minetest.get_modpath("3d_armor") then
-			def = armor.def[player:get_player_name()] or {}
-		end
+		-- set defaults
+		def.speed = 1
+		def.jump = 1
+		def.gravity = 1
 
-		-- set to armor physics or defaults
-		pp.speed = def.speed or 1
-		pp.jump = def.jump or 1
-		pp.gravity = def.gravity or 1
+		-- is 3d_armor mod active? if so make armor physics default
+		if armor_mod and armor and armor.def then
+			-- get player physics from armor
+			def.speed = armor.def[name].speed or 1
+			def.jump = armor.def[name].jump or 1
+			def.gravity = armor.def[name].gravity or 1
+		end
 
 		-- standing on ice? if so walk faster
 		if nod_stand == "default:ice" then
-			pp.speed = pp.speed + 0.4
+			def.speed = def.speed + 0.4
 		end
 
 		-- standing on snow? if so walk slower
@@ -79,12 +85,12 @@ minetest.register_globalstep(function(dtime)
 		or nod_stand == "default:snowblock"
 		-- wading in water? if so walk slower
 		or minetest.registered_nodes[nod_feet].groups.water then
-			pp.speed = pp.speed - 0.4
+			def.speed = def.speed - 0.4
 		end
 
 		-- set player physics
-		player:set_physics_override(pp.speed, pp.jump, pp.gravity)
-		--print ("Speed:", pp.speed, "Jump:", pp.jump, "Gravity:", pp.gravity)
+		player:set_physics_override(def.speed, def.jump, def.gravity)
+		--print ("Speed:", def.speed, "Jump:", def.jump, "Gravity:", def.gravity)
 
 		-- is player suffocating inside node? (only solid "normal" type nodes)
 		if minetest.registered_nodes[nod_head].walkable
