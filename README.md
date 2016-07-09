@@ -1,6 +1,6 @@
 PlayerPlus mod for minetest
 
-This mod lets the player walk faster when walking on ice, slows down the player
+This mod lets the player move faster when walking on ice, slows down the player
 when walking on snow or in water, and makes touching a cactus hurt... enjoy!
 
 https://forum.minetest.net/viewtopic.php?t=10090&p=153667
