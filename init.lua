@@ -97,7 +97,7 @@ minetest.register_globalstep(function(dtime)
 		-- is player suffocating inside node? (only solid "normal" type nodes)
 		if minetest.registered_nodes[ playerplus[name].nod_head ].walkable
 		and minetest.registered_nodes[ playerplus[name].nod_head ].drawtype == "normal"
-		and not minetest.check_player_privs(player:get_player_name(), {noclip = true}) then
+		and not minetest.check_player_privs(name, {noclip = true}) then
 
 			if player:get_hp() > 0 then
 				player:set_hp(player:get_hp() - 2)
