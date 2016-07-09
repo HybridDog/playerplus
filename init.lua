@@ -2,10 +2,12 @@
 	walking on ice makes player walk faster,
 	stepping through snow or water slows player down,
 	touching a cactus hurts player,
-	stuck inside node suffocates player.
+	and being stuck inside a solid node suffocates player.
 
 	PlayerPlus by TenPlus1
 ]]
+
+playerplus = {}
 
 -- get node but use fallback for nil or unknown
 local function node_ok(pos, fallback)
@@ -52,13 +54,13 @@ minetest.register_globalstep(function(dtime)
 
 		-- what is around me?
 		pos.y = pos.y - 0.1 -- standing on
-		local nod_stand = node_ok(pos)
+		playerplus[name].nod_stand = node_ok(pos)
 
 		pos.y = pos.y + 1.5 -- head level
-		local nod_head = node_ok(pos)
+		playerplus[name].nod_head = node_ok(pos)
 	
 		pos.y = pos.y - 1.2 -- feet level
-		local nod_feet = node_ok(pos)
+		playerplus[name].nod_feet = node_ok(pos)
 
 		pos.y = pos.y - 0.2 -- reset pos
 
@@ -76,15 +78,15 @@ minetest.register_globalstep(function(dtime)
 		end
 
 		-- standing on ice? if so walk faster
-		if nod_stand == "default:ice" then
+		if playerplus[name].nod_stand == "default:ice" then
 			def.speed = def.speed + 0.4
 		end
 
 		-- standing on snow? if so walk slower
-		if nod_stand == "default:snow"
-		or nod_stand == "default:snowblock"
+		if playerplus[name].nod_stand == "default:snow"
+		or playerplus[name].nod_stand == "default:snowblock"
 		-- wading in water? if so walk slower
-		or minetest.registered_nodes[nod_feet].groups.water then
+		or minetest.registered_nodes[ playerplus[name].nod_feet ].groups.water then
 			def.speed = def.speed - 0.4
 		end
 
@@ -93,8 +95,8 @@ minetest.register_globalstep(function(dtime)
 		--print ("Speed:", def.speed, "Jump:", def.jump, "Gravity:", def.gravity)
 
 		-- is player suffocating inside node? (only solid "normal" type nodes)
-		if minetest.registered_nodes[nod_head].walkable
-		and minetest.registered_nodes[nod_head].drawtype == "normal"
+		if minetest.registered_nodes[ playerplus[name].nod_head ].walkable
+		and minetest.registered_nodes[ playerplus[name].nod_head ].drawtype == "normal"
 		and not minetest.check_player_privs(player:get_player_name(), {noclip = true}) then
 
 			if player:get_hp() > 0 then
@@ -119,4 +121,15 @@ minetest.register_globalstep(function(dtime)
 
 	end
 
+end)
+
+-- set to blank on join (for 3rd party mods)
+minetest.register_on_joinplayer(function(player)
+
+	local name = player:get_player_name()
+
+	playerplus[name] = {}
+	playerplus[name].nod_head = ""
+	playerplus[name].nod_feet = ""
+	playerplus[name].nod_stand = ""
 end)
