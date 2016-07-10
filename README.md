@@ -18,7 +18,7 @@ Released under WTFPL
 
 API:
 
-Every second the mod checks which node the player is standing on, which node is
+Every step the mod checks which node the player is standing on, which node is
 at foot and head level and stores inside a global table to be used by mods:
 
 - playerplus[name].nod_stand

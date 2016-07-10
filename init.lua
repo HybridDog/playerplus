@@ -29,20 +29,8 @@ end
 
 local armor_mod = minetest.get_modpath("3d_armor")
 local def = {}
-local time = 0
 
-minetest.register_globalstep(function(dtime)
-
-	time = time + dtime
-
-	-- every 1 second
-	if time < 1 then
-		return
-	end
-
-	-- reset time for next check
-	time = 0
-
+local function on_step()
 	-- check players
 	for _,player in pairs(minetest.get_connected_players()) do
 
@@ -58,7 +46,7 @@ minetest.register_globalstep(function(dtime)
 
 		pos.y = pos.y + 1.5 -- head level
 		playerplus[name].nod_head = node_ok(pos)
-	
+
 		pos.y = pos.y - 1.2 -- feet level
 		playerplus[name].nod_feet = node_ok(pos)
 
@@ -120,8 +108,19 @@ minetest.register_globalstep(function(dtime)
 		end
 
 	end
+end
 
-end)
+local function step()
+	on_step()
+
+	-- approximately avoid executing more than 30 times a second
+	minetest.after(0.05, function()
+
+		-- if it's lagging, wait, but not longer than 2 seconds
+		minetest.delay_function(2, step)
+	end)
+end
+step()
 
 -- set to blank on join (for 3rd party mods)
 minetest.register_on_joinplayer(function(player)
